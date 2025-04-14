@@ -14,7 +14,7 @@ django-widget-tweaks==1.4.8
 djangorestframework==3.14.0
 dnspython==2.1.0
 gunicorn==23.0.0
-lxml==4.8.0
+lxml==4.9.3
 mysqlclient==2.1.1
 pillow==11.1.0
 python-bidi==0.6.6
