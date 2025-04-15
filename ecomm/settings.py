@@ -82,7 +82,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
 DATABASES = {
-     'default': dj_database_url.config(default=config('DATABASE_URL'))
+        'default': dj_database_url.config(default=config('DATABASE_URL')),
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
