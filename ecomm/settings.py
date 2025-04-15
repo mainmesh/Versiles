@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
@@ -81,7 +82,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
 DATABASES = {
-    'default': {
+     'default': dj_database_url.config(default=config('DATABASE_URL'))
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
@@ -89,7 +90,7 @@ DATABASES = {
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
     }
-}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
