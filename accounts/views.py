@@ -108,25 +108,17 @@ def activate_email_account(request, email_token):
 @login_required
 def add_to_cart(request, uid):
     try:
-        product = get_object_or_404(Product, uid=uid)
         variant = request.GET.get('size')
+        if not variant:
+            messages.warning(request, 'Please select a size variant!')
+            return redirect(request.META.get('HTTP_REFERER'))
 
-        # Only require size if the product has size variants
-        if product.size_variant.exists():
-            if not variant:
-                messages.warning(request, 'Please select a size variant!')
-                return redirect(request.META.get('HTTP_REFERER'))
-
-            size_variant = get_object_or_404(SizeVariant, size_name=variant)
-        else:
-            size_variant = None  # No size needed
-
+        product = get_object_or_404(Product, uid=uid)
         cart, _ = Cart.objects.get_or_create(user=request.user, is_paid=False)
+        size_variant = get_object_or_404(SizeVariant, size_name=variant)
 
         cart_item, created = CartItem.objects.get_or_create(
-            cart=cart, product=product, size_variant=size_variant
-        )
-
+            cart=cart, product=product, size_variant=size_variant)
         if not created:
             cart_item.quantity += 1
             cart_item.save()
@@ -134,11 +126,9 @@ def add_to_cart(request, uid):
         messages.success(request, 'Item added to cart successfully.')
 
     except Exception as e:
-        messages.error(request, f'Error adding item to cart: {str(e)}')
+        messages.error(request, 'Error adding item to cart.', str(e))
 
     return redirect(reverse('cart'))
-
-
 
 
 @login_required
@@ -189,6 +179,12 @@ def cart(request):
                 request, 'Total amount in cart is less than the minimum required amount (1.00 INR). Please add a product to the cart.')
             return redirect('index')
 
+        client = razorpay.Client(
+            auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
+        payment = client.order.create(
+            {'amount': cart_total_in_paise, 'currency': 'INR', 'payment_capture': 1})
+        cart_obj.razorpay_order_id = payment['id']
+        cart_obj.save()
 
     context = {'cart': cart_obj, 'payment': payment, 'quantity_range': range(1, 6), }
     return render(request, 'accounts/cart.html', context)

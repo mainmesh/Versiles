@@ -141,22 +141,20 @@ def delete_review(request, slug, review_uid):
 # Add a product to Wishlist
 @login_required
 def add_to_wishlist(request, uid):
+    variant = request.GET.get('size')
+    if not variant:
+        messages.warning(request, 'Please select a size variant before adding to the wishlist!')
+        return redirect(request.META.get('HTTP_REFERER'))
+
     product = get_object_or_404(Product, uid=uid)
-
-    # Check if product is already in wishlist (with or without size)
+    size_variant = get_object_or_404(SizeVariant, size_name=variant)
     wishlist, created = Wishlist.objects.get_or_create(
-        user=request.user,
-        product=product,
-        defaults={'size_variant': None}
-    )
+        user=request.user, product=product, size_variant=size_variant)
 
-    if not created:
-        messages.info(request, "Product is already in your wishlist.")
-    else:
+    if created:
         messages.success(request, "Product added to Wishlist!")
 
     return redirect(reverse('wishlist'))
-
 
 
 # Remove product from wishlist

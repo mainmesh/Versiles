@@ -5,7 +5,6 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 # Create your views here.
 
-
 def index(request):
     query = Product.objects.all()
     categories = Category.objects.all()
@@ -33,7 +32,8 @@ def index(request):
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
     except Exception as e:
-        print(e)
+        print(f"Pagination error: {e}")
+        products = []  # Prevent UnboundLocalError
 
     context = {
         'products': products,
@@ -48,13 +48,17 @@ def product_search(request):
     query = request.GET.get('q', '')
 
     if query:
-        # Search for products that contain the query string in their product_name field
-        products = Product.objects.filter(Q(product_name__icontains=query) | Q(
-            product_name__istartswith=query))
+        products = Product.objects.filter(
+            Q(product_name__icontains=query) |
+            Q(product_name__istartswith=query)
+        )
     else:
         products = Product.objects.none()
 
-    context = {'query': query, 'products': products}
+    context = {
+        'query': query,
+        'products': products,
+    }
     return render(request, 'home/search.html', context)
 
 
