@@ -13,10 +13,9 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("SECRET_KEY")
-DEBUG = config("DEBUG")
-ALLOWED_HOSTS = ['versiles-em39.onrender.com']
+DEBUG = config("DEBUG", cast=bool)
 
-
+ALLOWED_HOSTS = ['versiles-em39.onrender.com', '127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -35,12 +34,10 @@ INSTALLED_APPS = [
     'accounts',
     'home',
 
-    # Django Allauth (Google only)
+    # Django Allauth
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    
-  
 
     # Forms and utilities
     'django_countries',
@@ -141,11 +138,13 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-
+# Local development defaults
 DEFAULT_DOMAIN = '127.0.0.1:8000'
 DEFAULT_HTTP_PROTOCOL = 'http'
-# ✅ Secure settings for deployment on Render (HTTPS)
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# ✅ Secure settings for Render deployment
+SESSION_COOKIE_SECURE = not DEBUG  # True in production
+CSRF_COOKIE_SECURE = not DEBUG     # True in production
+SESSION_COOKIE_SAMESITE = 'Lax'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
